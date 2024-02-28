@@ -12,7 +12,7 @@ export class OtpService {
     @InjectModel(OTP_MODEL) private readonly otpModel: Model<OtpDocument>,
   ) {}
 
-  async generateOtp(email: string): Promise<string> {
+  async generateOtp(email: string) {
     // Generate a random 4-digit OTP
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 

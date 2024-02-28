@@ -29,7 +29,18 @@ export class RentalController {
     return this.rentalService.create(createRentalDto);
   }
 
-  @Get(':userId')
+  @Post('genUID/:id')
+  async uidVerify(@Param('id') id: string, @Body() GenUID: string) {
+    return this.rentalService.uidVerify(GenUID, id);
+  }
+
+  @Get(':id')
+  @Header('Cache-Control', 'GET')
+  findById(@Param('id') id: string) {
+    return this.rentalService.findById(id);
+  }
+
+  @Get('user/:userId')
   @Header('Cache-Control', 'GET')
   findOne(@Param('userId') userId: string) {
     return this.rentalService.findOne(userId);
@@ -44,9 +55,13 @@ export class RentalController {
     return this.rentalService.update(id, updateRentalDto);
   }
 
-  @Delete(':id')
+  @Delete('booking/:id/:userId/:bikeId')
   @Header('Cache-Control', 'POST')
-  Delete(@Param('id') id: string) {
-    return this.rentalService.Delete(id);
+  Delete(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Param('bikeId') bikeId: string,
+  ) {
+    return this.rentalService.Delete(id, userId, bikeId);
   }
 }

@@ -28,6 +28,9 @@ export class Bikes {
   @Prop()
   rent: string;
 
+  @Prop({ default: false })
+  isRented: boolean;
+
   @Prop()
   mileage: string;
 
