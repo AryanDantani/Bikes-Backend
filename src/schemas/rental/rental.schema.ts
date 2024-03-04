@@ -28,6 +28,18 @@ export class Rental {
   @Prop()
   city: string;
 
+  @Prop({ default: false })
+  isCancel: boolean;
+
+  @Prop({ default: false })
+  isCompleted: boolean;
+
+  @Prop({ default: false })
+  isDeleted: boolean;
+
+  @Prop()
+  status: string;
+
   @Prop()
   phone: string;
 
@@ -35,7 +47,16 @@ export class Rental {
   date: string;
 
   @Prop()
-  time: string;
+  startTime: string;
+
+  @Prop()
+  UID: string;
+
+  @Prop()
+  endTime: string;
+
+  @Prop()
+  licenceNumber: string;
 }
 
 export type RentalDocument = Rental & Document;

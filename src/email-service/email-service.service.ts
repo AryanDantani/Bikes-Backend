@@ -14,14 +14,14 @@ export class EmailService {
           pass: process.env.OWNER_PASSWORD,
         },
       });
-
-      await transporter.sendMail({
+      console.log(userData.email);
+      const data = await transporter.sendMail({
         from: process.env.OWNER_EMAIL,
         to: userData.email,
         subject: userData.subject,
         html: userData.html,
       });
-
+      console.log(data);
       return true; // Email sent successfully
     } catch (error) {
       console.error('Error sending email:', error);

@@ -29,10 +29,27 @@ export class RentalController {
     return this.rentalService.create(createRentalDto);
   }
 
-  @Get(':userId')
+  @Post('genUID/:id/:uid')
+  async uidVerify(@Param('id') id: string, @Param('uid') UID: string) {
+    return this.rentalService.uidVerify(UID, id);
+  }
+
+  @Get(':id')
+  @Header('Cache-Control', 'GET')
+  findById(@Param('id') id: string) {
+    return this.rentalService.findById(id);
+  }
+
+  @Get('user/:userId')
   @Header('Cache-Control', 'GET')
   findOne(@Param('userId') userId: string) {
     return this.rentalService.findOne(userId);
+  }
+
+  @Get('user/bookings/:userId')
+  @Header('Cache-Control', 'GET')
+  findBooking(@Param('userId') userId: string) {
+    return this.rentalService.findBooking(userId);
   }
 
   @Put(':id')
@@ -44,9 +61,19 @@ export class RentalController {
     return this.rentalService.update(id, updateRentalDto);
   }
 
-  @Delete(':id')
-  @Header('Cache-Control', 'POST')
-  Delete(@Param('id') id: string) {
-    return this.rentalService.Delete(id);
+  @Delete('booking/:id/:bikeId')
+  @Header('Cache-Control', 'DELETE')
+  CancelBookings(@Param('id') id: string, @Param('bikeId') bikeId: string) {
+    return this.rentalService.CancelBookings(id, bikeId);
+  }
+
+  @Delete('booking/:id/:userId/:bikeId')
+  @Header('Cache-Control', 'DELETE')
+  Delete(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Param('bikeId') bikeId: string,
+  ) {
+    return this.rentalService.Delete(id, userId, bikeId);
   }
 }

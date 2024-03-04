@@ -7,5 +7,6 @@ import { BikeModule } from 'src/bike/bike.module';
   imports: [BikeModule],
   controllers: [CategoryController],
   providers: [CategoryService],
+  exports: [CategoryService],
 })
 export class CategoryModule {}

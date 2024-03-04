@@ -24,6 +24,16 @@ export class UsersService {
     private readonly otpService: OtpService,
   ) {}
 
+  async findAll() {
+    const user = await this.userModule.find();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async signUp(createUserDto: CreateUserDto) {
     const { name, email, password, phone } = createUserDto;
 
@@ -69,6 +79,8 @@ export class UsersService {
   }
 
   async sendPasswordResetEmail(email: string) {
+    console.log(email);
+    // const user = await this.userModule.find({ where: { email: email } });
     const user = await this.userModule.findOne({ email });
     if (!user) {
       return {
@@ -140,9 +152,10 @@ export class UsersService {
     console.log(sendEmail);
 
     console.log('Password reset email sent successfully.', token);
+    return 'hello test';
   }
 
-  async findUserByEmail(email: string): Promise<UserDocument> {
+  async findUserByEmail(email: string) {
     return this.userModule.findOne({ email }).exec();
   }
 

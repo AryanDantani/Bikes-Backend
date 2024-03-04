@@ -40,5 +40,13 @@ export class CreateRentalDto {
 
   @IsNotEmpty()
   @IsString()
-  time: string;
+  startTime: string;
+
+  @IsNotEmpty()
+  @IsString()
+  endTime: string;
+
+  @IsNotEmpty()
+  @IsString()
+  licenceNumber: string;
 }
