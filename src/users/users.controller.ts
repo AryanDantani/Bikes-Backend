@@ -16,6 +16,12 @@ import { LoginDto } from 'src/Common-DTO/Login.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get()
+  @Header('Cache-Control', 'GET')
+  findAll() {
+    return this.usersService.findAll();
+  }
+
   @Get(':id')
   @Header('Cache-Control', 'GET')
   findOne(@Param('id') id: string) {

@@ -10,7 +10,8 @@ import { CategoryModule } from './category/category.module';
 import { BikeModule } from './bike/bike.module';
 import { EmailServiceModule } from './email-service/email-service.module';
 import { OtpModule } from './otp/otp.module';
-
+import { RewardsModule } from './rewards/rewards.module';
+import { CronModule } from './cronJob/cronJob.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,6 +26,8 @@ import { OtpModule } from './otp/otp.module';
     BikeModule,
     EmailServiceModule,
     OtpModule,
+    RewardsModule,
+    CronModule,
   ],
   controllers: [AppController],
   providers: [AppService],

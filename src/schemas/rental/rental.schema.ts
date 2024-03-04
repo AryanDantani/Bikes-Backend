@@ -31,8 +31,14 @@ export class Rental {
   @Prop({ default: false })
   isCancel: boolean;
 
-  @Prop({ default: true })
+  @Prop({ default: false })
   isCompleted: boolean;
+
+  @Prop({ default: false })
+  isDeleted: boolean;
+
+  @Prop()
+  status: string;
 
   @Prop()
   phone: string;

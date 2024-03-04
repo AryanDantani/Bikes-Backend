@@ -9,9 +9,11 @@ import { JwtService } from '@nestjs/jwt';
 import { EmailService } from 'src/email-service/email-service.service';
 import { OtpService } from 'src/otp/otp.service';
 import { CategoryService } from 'src/category/category.service';
+import { RewardsService } from 'src/rewards/rewards.service';
+import { RewardsModule } from 'src/rewards/rewards.module';
 
 @Module({
-  imports: [UsersModule, BikeModule],
+  imports: [UsersModule, BikeModule, RewardsModule],
   controllers: [RentalController],
   providers: [
     RentalService,
@@ -21,6 +23,8 @@ import { CategoryService } from 'src/category/category.service';
     EmailService,
     OtpService,
     CategoryService,
+    RewardsService,
   ],
+  exports: [RentalModule],
 })
 export class RentalModule {}

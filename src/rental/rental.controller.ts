@@ -29,9 +29,9 @@ export class RentalController {
     return this.rentalService.create(createRentalDto);
   }
 
-  @Post('genUID/:id')
-  async uidVerify(@Param('id') id: string, @Body() GenUID: string) {
-    return this.rentalService.uidVerify(GenUID, id);
+  @Post('genUID/:id/:uid')
+  async uidVerify(@Param('id') id: string, @Param('uid') UID: string) {
+    return this.rentalService.uidVerify(UID, id);
   }
 
   @Get(':id')
@@ -46,6 +46,12 @@ export class RentalController {
     return this.rentalService.findOne(userId);
   }
 
+  @Get('user/bookings/:userId')
+  @Header('Cache-Control', 'GET')
+  findBooking(@Param('userId') userId: string) {
+    return this.rentalService.findBooking(userId);
+  }
+
   @Put(':id')
   @Header('Cache-Control', 'UPDATE')
   async update(
@@ -55,8 +61,14 @@ export class RentalController {
     return this.rentalService.update(id, updateRentalDto);
   }
 
+  @Delete('booking/:id/:bikeId')
+  @Header('Cache-Control', 'DELETE')
+  CancelBookings(@Param('id') id: string, @Param('bikeId') bikeId: string) {
+    return this.rentalService.CancelBookings(id, bikeId);
+  }
+
   @Delete('booking/:id/:userId/:bikeId')
-  @Header('Cache-Control', 'POST')
+  @Header('Cache-Control', 'DELETE')
   Delete(
     @Param('id') id: string,
     @Param('userId') userId: string,

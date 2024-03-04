@@ -24,6 +24,16 @@ export class UsersService {
     private readonly otpService: OtpService,
   ) {}
 
+  async findAll() {
+    const user = await this.userModule.find();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async signUp(createUserDto: CreateUserDto) {
     const { name, email, password, phone } = createUserDto;
 
