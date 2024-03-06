@@ -12,6 +12,15 @@ import { CategoryService } from './category.service';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
+  @Get(':type')
+  async getCategoryByType(@Param('type') type: string) {
+    const category = await this.categoryService.findByType(type);
+    if (!category) {
+      throw new NotFoundException('Category Not Found');
+    }
+    return category;
+  }
+
   @Get()
   @Header('Cache-Control', 'GET')
   findAll() {

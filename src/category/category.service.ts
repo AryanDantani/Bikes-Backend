@@ -23,6 +23,32 @@ export class CategoryService {
     return categorys;
   }
 
+  async findByType(type: string) {
+    const category = await this.categoryModel.find({ type: type });
+
+    if (!category) {
+      return {
+        status: false,
+        message: 'Category Not Found',
+      };
+    }
+
+    return category;
+  }
+
+  async addBikeToCategory(categoryId: string, newBikeData: any) {
+    const category = await this.categoryModel.findById(categoryId);
+
+    if (!category) {
+      throw new NotFoundException('Category Not Found');
+    }
+
+    category.bikes.push(newBikeData);
+    // console.log(category.bikes, 'bikes');
+    const result = await category.save();
+    return result;
+  }
+
   async findOne(id: string) {
     const category = await this.categoryModel.findById(id);
 

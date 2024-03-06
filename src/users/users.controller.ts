@@ -40,6 +40,16 @@ export class UsersController {
     return this.usersService.login(loginDto);
   }
 
+  @Post('/:email/password')
+  async AccountDelete(
+    @Param('email') email: string,
+    @Body('password') password: string,
+  ) {
+    console.log(email);
+    await this.usersService.AccountDelete(email, password);
+    return { message: 'Password Deleted successfully' };
+  }
+
   @Post('/send/forgot-password')
   async forgotPassword(@Body('email') email: string) {
     await this.usersService.sendPasswordResetEmail(email);
