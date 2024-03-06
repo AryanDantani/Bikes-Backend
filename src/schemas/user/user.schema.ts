@@ -25,6 +25,9 @@ export class User {
 
   @Prop({ default: 'user' })
   role: string;
+
+  @Prop({ required: true, default: 'Active' })
+  status: string;
 }
 
 export type UserDocument = User & Document;

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { BIKE_MODEL, BikeDocument } from 'src/schemas/bike/bike.schema';
+import { CreateBikeDto } from './dto/create-bike.dto';
 
 @Injectable()
 export class BikeService {
@@ -19,6 +20,11 @@ export class BikeService {
       throw new NotFoundException('Job not found');
     }
 
-    return 'bikeData';
+    return bikeData;
+  }
+
+  async addBike(createBikeDto: CreateBikeDto) {
+    const bikeData = await this.bikeModel.create(createBikeDto);
+    return bikeData;
   }
 }

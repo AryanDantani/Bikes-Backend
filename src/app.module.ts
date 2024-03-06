@@ -12,6 +12,8 @@ import { EmailServiceModule } from './email-service/email-service.module';
 import { OtpModule } from './otp/otp.module';
 import { RewardsModule } from './rewards/rewards.module';
 import { CronModule } from './cronJob/cronJob.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { AddRentalModule } from './add-rental/add-rental.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -28,6 +30,8 @@ import { CronModule } from './cronJob/cronJob.module';
     OtpModule,
     RewardsModule,
     CronModule,
+    CloudinaryModule,
+    AddRentalModule,
   ],
   controllers: [AppController],
   providers: [AppService],

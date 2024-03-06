@@ -1,7 +1,7 @@
 import {
   Injectable,
   NotFoundException,
-  UnauthorizedException,
+  // UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -35,27 +35,32 @@ export class UsersService {
   }
 
   async signUp(createUserDto: CreateUserDto) {
-    const { name, email, password, phone } = createUserDto;
+    const { name, email, password, phone, role } = createUserDto;
 
-    const existingUserWithEmail = await this.userModule.findOne({
-      name,
-      email,
-      phone,
-    });
+    const existingUserWithEmail = await this.userModule.findOne({ email });
     if (existingUserWithEmail) {
-      throw new Error('Data is already exists');
+      existingUserWithEmail.status = 'Active';
+
+      existingUserWithEmail.markModified('user');
+      await existingUserWithEmail.save();
+      return {
+        status: true,
+        message: 'Account Created Successfuly',
+      };
+    } else {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const user = await this.userModule.create({
+        name,
+        email,
+        password: hashedPassword,
+        phone,
+        role,
+      });
+      console.log(user);
+
+      // return { user };
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await this.userModule.create({
-      name,
-      email,
-      password: hashedPassword,
-      phone,
-    });
-
-    return { user };
   }
 
   async login(loginDto: LoginDto) {
@@ -64,18 +69,32 @@ export class UsersService {
     const user = await this.userModule.findOne({ email });
     console.log(user);
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      return {
+        statusCode: 404, // Not Found
+        status: false,
+        message: 'User Not Found',
+      };
+    } else if (user.status === 'Deactivate') {
+      return {
+        statusCode: 403, // Forbidden
+        status: false,
+        message: 'User Deactivated',
+      };
     }
 
     const isPasswordMatched = await bcrypt.compare(password, user.password);
     console.log(isPasswordMatched);
 
     if (!isPasswordMatched) {
-      throw new UnauthorizedException('Invalid email or password');
+      return {
+        statusCode: 401, // Unauthorized
+        status: false,
+        message: 'Invalid email or password',
+      };
     }
 
     const token = this.jwtService.sign({ id: user._id });
-    return { data: user, token };
+    return { statusCode: 200, data: user, token }; // Success
   }
 
   async sendPasswordResetEmail(email: string) {
@@ -173,6 +192,37 @@ export class UsersService {
     await this.userModule
       .findByIdAndUpdate(user._id, { password: hashedPassword })
       .exec();
+  }
+
+  async AccountDelete(email: string, password: string) {
+    // Find the user by email
+    const user = await this.findUserByEmail(email);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    console.log(user);
+
+    user.status = 'Deactivate';
+
+    user.markModified('user');
+    await user.save();
+
+    // Check if the provided password matches the stored hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return {
+        status: false,
+        message: 'Invalid Password',
+      };
+    } else {
+      return {
+        status: true,
+        message: 'User Deleted SuccessFully',
+      };
+    }
+
+    // Delete the user account
+    // await this.deleteUserByEmail(email);
   }
 
   async findOne(id: string) {

@@ -11,7 +11,7 @@ export class Bikes {
   // id: Types.ObjectId;
 
   @Prop()
-  available: string;
+  date: string;
 
   @Prop()
   engine: string;
