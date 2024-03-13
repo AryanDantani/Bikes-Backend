@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Category_MODEL,
@@ -14,13 +18,15 @@ export class CategoryService {
   ) {}
 
   async findAll() {
-    const categorys = await this.categoryModel.find();
-
-    if (!categorys) {
-      throw new NotFoundException('Category Not Found');
+    try {
+      const categories = await this.categoryModel.find();
+      return Object(categories);
+    } catch (error) {
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
+      };
     }
-
-    return categorys;
   }
 
   async findByType(type: string) {
@@ -60,14 +66,95 @@ export class CategoryService {
   }
 
   async findBike(bikeId: string) {
-    const categories = await this.findAll();
-    for (const category of categories) {
-      const bike = category.bikes.find((b) => b._id.toString() === bikeId);
-      if (bike) {
-        return bike;
+    try {
+      const categories = await this.findAll();
+
+      for (const category of categories) {
+        const bike = category.bikes.find((b) => b._id.toString() === bikeId);
+        if (bike) {
+          return {
+            status: true,
+            message: 'Get Bike by Id SuccessFully',
+            bike,
+          };
+        }
+      }
+
+      throw new NotFoundException('Bike not found');
+    } catch (error) {
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
+      };
+    }
+  }
+
+  async findBikeUpdate(bikeId: string) {
+    try {
+      const categories = await this.findAll();
+      for (const category of categories) {
+        const bike = category.bikes.find((b) => b._id.toString() === bikeId);
+        if (!bike) {
+          return {
+            status: false,
+            message: 'Bike Data is Not Found',
+          };
+        } else if (bike.status === 'Deactivate') {
+          bike.status = 'Active';
+          category.markModified('bikes');
+          await category.save();
+          return {
+            status: true,
+            message: 'Bike status updated successfully',
+            bike,
+          };
+        } else if (bike.status === 'Active') {
+          bike.status = 'Deactivate';
+          category.markModified('bikes');
+          await category.save();
+          return {
+            status: true,
+            message: 'Bike status updated successfully',
+            bike,
+          };
+        } else {
+          return {
+            status: false,
+            message: 'Bike Data is not Updated',
+          };
+        }
+      }
+      throw new NotFoundException('Bike not found');
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error; // Rethrow NotFoundException if it's already the specific error
+      } else {
+        throw new InternalServerErrorException(
+          'An error occurred while updating bike status',
+        );
       }
     }
-    throw new NotFoundException('Bike not found');
+  }
+
+  async deleteBike(Id: string) {
+    try {
+      const categories = await this.findAll();
+      for (const category of categories) {
+        const index = category.bikes.findIndex((b) => b._id.toString() === Id);
+        console.log(index);
+        if (index !== -1) {
+          category.bikes.splice(index, 1);
+          await category.save();
+          return { status: true, message: 'Bike deleted successfully' };
+        }
+      }
+      throw new NotFoundException('Bike not found');
+    } catch (error) {
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
+      };
+    }
   }
 
   async incrementStock(bikeId: string) {
@@ -77,50 +164,48 @@ export class CategoryService {
       for (const category of categories) {
         const bike = category.bikes.find((b) => b._id.toString() === bikeId);
         if (bike) {
-          // Bike found, increment its stock
           const bikeWithStock = bike as { stock: number };
           bikeWithStock.stock += 1;
-
-          // Mark the category as modified and save
           category.markModified('bikes');
           await category.save();
-
-          return; // Exit the function once the stock is incremented
+          return;
         }
       }
 
       throw new NotFoundException('Bike not found');
     } catch (error) {
-      throw new Error(`Failed to increment stock: ${error.message}`);
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
+      };
     }
   }
 
   async decrementStock(bikeId: string) {
-    // Find all categories
-    const categories = await this.findAll();
-
-    // Iterate over each category to find the bike
-    for (const category of categories) {
-      const bike = category.bikes.find((b) => b._id.toString() === bikeId);
-      if (bike) {
-        // Bike found, decrement its stock
-        const bikeWithStock = bike as { stock: number };
-        if (bikeWithStock.stock > 0) {
-          bikeWithStock.stock -= 1;
-        } else {
-          throw new Error('Stock is already 0');
+    try {
+      const categories = await this.findAll();
+      for (const category of categories) {
+        const bike = category.bikes.find((b) => b._id.toString() === bikeId);
+        if (bike) {
+          const bikeWithStock = bike as { stock: number };
+          if (bikeWithStock.stock > 0) {
+            bikeWithStock.stock -= 1;
+          } else {
+            throw new Error('Stock is already 0');
+          }
+          category.markModified('bikes');
+          await category.save();
+          console.log(category);
+          return;
         }
-
-        // Mark the category as modified and save
-        category.markModified('bikes');
-        await category.save();
-
-        console.log(category); // Log the updated category
-        return; // Exit the function once the bike is found and stock is decremented
       }
-    }
 
-    // If the loop completes without finding the bike, throw NotFoundException
-    throw new NotFoundException('Bike not found');
+      throw new NotFoundException('Bike not found');
+    } catch (error) {
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
+      };
+    }
   }
 }

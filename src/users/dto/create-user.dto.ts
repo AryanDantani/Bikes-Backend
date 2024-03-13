@@ -19,5 +19,21 @@ export class CreateUserDto {
 
   @IsString()
   @IsOptional()
+  image: string;
+
+  @IsString()
+  @IsOptional()
   role: string;
+}
+
+export class User extends CreateUserDto {
+  status: boolean;
+  message: string;
+  user: CreateUserDto;
+}
+
+export interface EmptyUser {
+  status: boolean;
+  message: string;
+  user: unknown;
 }

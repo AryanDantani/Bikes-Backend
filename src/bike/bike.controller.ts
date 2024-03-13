@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   // Post,
   // Body,
@@ -23,5 +24,10 @@ export class BikeController {
   @Post()
   async addBike(@Body() createBikeDto: CreateBikeDto) {
     return this.bikeService.addBike(createBikeDto);
+  }
+
+  @Delete(':id')
+  async DeleteBike(@Param('id') id: string) {
+    return this.bikeService.deleteById(id);
   }
 }

@@ -43,6 +43,14 @@ export class CreateAddRentalDto {
 
   @IsNotEmpty()
   @IsString()
+  userId: string;
+
+  @IsOptional()
+  @IsString()
+  bikeId: string;
+
+  @IsNotEmpty()
+  @IsString()
   date: string;
 
   @IsNotEmpty()

@@ -1,19 +1,14 @@
-import {
-  Injectable,
-  NotFoundException,
-  // UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { USER_MODEL, UserDocument } from 'src/schemas/user/user.schema';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, EmptyUser, User } from './dto/create-user.dto';
 import { LoginDto } from 'src/Common-DTO/Login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from 'src/email-service/email-service.service';
 import { OtpService } from 'src/otp/otp.service';
-// import * as nodemailer from 'nodemailer';
-// import * as nodemailer from 'nodemailer';
+
 @Injectable()
 export class UsersService {
   findById: any;
@@ -25,93 +20,118 @@ export class UsersService {
   ) {}
 
   async findAll() {
-    const user = await this.userModule.find();
+    try {
+      const user = await this.userModule.find();
 
-    if (!user) {
-      throw new NotFoundException('User not found');
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return {
+        status: true,
+        message: 'Get All Users Data SuccessFully',
+        user,
+      };
+    } catch (error) {
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
+      };
     }
-
-    return user;
   }
 
   async signUp(createUserDto: CreateUserDto) {
-    const { name, email, password, phone, role } = createUserDto;
+    try {
+      const { name, email, password, phone, role } = createUserDto;
 
-    const existingUserWithEmail = await this.userModule.findOne({ email });
-    if (existingUserWithEmail) {
-      existingUserWithEmail.status = 'Active';
+      const existingUserWithEmail = await this.userModule.findOne({ email });
+      if (existingUserWithEmail) {
+        existingUserWithEmail.status = 'Active';
 
-      existingUserWithEmail.markModified('user');
-      await existingUserWithEmail.save();
+        existingUserWithEmail.markModified('user');
+        await existingUserWithEmail.save();
+        return {
+          status: true,
+          message: 'Account Created Successfuly',
+        };
+      } else {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = await this.userModule.create({
+          name,
+          email,
+          password: hashedPassword,
+          phone,
+          role,
+        });
+
+        return {
+          status: true,
+          message: 'User Register SuccessFully',
+          user,
+        };
+      }
+    } catch (error) {
       return {
-        status: true,
-        message: 'Account Created Successfuly',
+        status: false,
+        message: error.message || 'Internal Server Error',
       };
-    } else {
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const user = await this.userModule.create({
-        name,
-        email,
-        password: hashedPassword,
-        phone,
-        role,
-      });
-      console.log(user);
-
-      // return { user };
     }
   }
 
   async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
-    console.log(loginDto);
-    const user = await this.userModule.findOne({ email });
-    console.log(user);
-    if (!user) {
+    try {
+      const { email, password } = loginDto;
+      const user = await this.userModule.findOne({ email });
+      if (!user) {
+        return {
+          statusCode: 404, // Not Found
+          status: false,
+          message: 'User Not Found',
+        };
+      } else if (user.status === 'Deactivate') {
+        return {
+          statusCode: 403, // Forbidden
+          status: false,
+          message: 'User Deactivated',
+        };
+      }
+
+      const isPasswordMatched = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordMatched) {
+        return {
+          statusCode: 401, // Unauthorized
+          status: false,
+          message: 'Invalid email or password',
+        };
+      }
+
+      const token = this.jwtService.sign({ id: user._id });
+      return { statusCode: 200, data: user, token }; // Success
+    } catch (error) {
       return {
-        statusCode: 404, // Not Found
         status: false,
-        message: 'User Not Found',
-      };
-    } else if (user.status === 'Deactivate') {
-      return {
-        statusCode: 403, // Forbidden
-        status: false,
-        message: 'User Deactivated',
+        message: error.message || 'Internal Server Error',
       };
     }
-
-    const isPasswordMatched = await bcrypt.compare(password, user.password);
-    console.log(isPasswordMatched);
-
-    if (!isPasswordMatched) {
-      return {
-        statusCode: 401, // Unauthorized
-        status: false,
-        message: 'Invalid email or password',
-      };
-    }
-
-    const token = this.jwtService.sign({ id: user._id });
-    return { statusCode: 200, data: user, token }; // Success
   }
 
   async sendPasswordResetEmail(email: string) {
-    console.log(email);
-    // const user = await this.userModule.find({ where: { email: email } });
-    const user = await this.userModule.findOne({ email });
-    if (!user) {
-      return {
-        message: 'User not found',
-      };
-    }
-    const token = this.jwtService.sign({ email });
-    const GenratedOtp = await this.otpService.generateOtp(email);
-    const userData = {
-      email: email,
-      subject: 'Password Reset Request',
-      html: `
+    try {
+      const user = await this.userModule.findOne({ email });
+      if (!user) {
+        return {
+          status: false,
+          message: 'User not found',
+        };
+      }
+      const token = this.jwtService.sign({ email });
+      const GenratedOtp = await this.otpService.generateOtp(email);
+      const userData = {
+        email: email,
+        subject: 'Password Reset Request',
+        html: `
       <body>
     <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
         <tbody>
@@ -166,12 +186,28 @@ export class UsersService {
     </table>
 </body>
       `,
-    };
-    const sendEmail = await this.emailService.sendEmail(userData);
-    console.log(sendEmail);
+      };
+      const sendEmail = await this.emailService.sendEmail(userData);
+      console.log(sendEmail);
 
-    console.log('Password reset email sent successfully.', token);
-    return 'hello test';
+      if (!sendEmail) {
+        return {
+          status: false,
+          message: 'Facing issue while Sent Email For Reset PassWord',
+        };
+      }
+
+      console.log('token', token);
+      return {
+        status: true,
+        message: 'Password reset email sent successfully',
+      };
+    } catch (error) {
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
+      };
+    }
   }
 
   async findUserByEmail(email: string) {
@@ -179,59 +215,72 @@ export class UsersService {
   }
 
   async findUserAndUpdatePasswordByEmail(email: any, newPassword: string) {
-    // Find the user by email
-    const user = await this.findUserByEmail(email);
-    if (!user) {
-      throw new NotFoundException('User not found');
+    try {
+      const user = await this.findUserByEmail(email);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await this.userModule
+        .findByIdAndUpdate(user._id, { password: hashedPassword })
+        .exec();
+    } catch (error) {
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
+      };
     }
-
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update the password in the database
-    await this.userModule
-      .findByIdAndUpdate(user._id, { password: hashedPassword })
-      .exec();
   }
 
   async AccountDelete(email: string, password: string) {
-    // Find the user by email
-    const user = await this.findUserByEmail(email);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    console.log(user);
+    try {
+      const user = await this.findUserByEmail(email);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
 
-    user.status = 'Deactivate';
-
-    user.markModified('user');
-    await user.save();
-
-    // Check if the provided password matches the stored hashed password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return {
+          status: false,
+          message: 'Invalid Password',
+        };
+      } else {
+        user.status = 'Deactivate';
+        user.markModified('user');
+        await user.save();
+        return {
+          status: true,
+          message: 'User Account Deleted SuccessFully',
+        };
+      }
+    } catch (error) {
       return {
         status: false,
-        message: 'Invalid Password',
-      };
-    } else {
-      return {
-        status: true,
-        message: 'User Deleted SuccessFully',
+        message: error.message || 'Internal Server Error',
       };
     }
-
-    // Delete the user account
-    // await this.deleteUserByEmail(email);
   }
 
-  async findOne(id: string) {
-    const user = await this.userModule.findById(id);
+  async findOne(id: string): Promise<User | EmptyUser> {
+    try {
+      const user = await this.userModule.findById(id);
 
-    if (!user) {
-      throw new NotFoundException('User not found');
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      console.log(user, 'user');
+      return {
+        status: true,
+        user: user,
+        message: '',
+      };
+    } catch (error) {
+      return {
+        status: true,
+        user: {},
+        message: error.message || 'Internal server error',
+      };
     }
-
-    return user;
   }
 }

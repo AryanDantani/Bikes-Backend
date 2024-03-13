@@ -26,4 +26,16 @@ export class CloudinaryController {
     return result;
     // console.log(result);
   }
+
+  @Post('upload/:userId')
+  @UseInterceptors(FileInterceptor('image'))
+  async uploadProfile(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('userId') userId: string,
+  ) {
+    // console.log(file);
+    const result = await this.cloudinaryService.uploadProfile(file, userId);
+    return result;
+    // console.log(result);
+  }
 }
