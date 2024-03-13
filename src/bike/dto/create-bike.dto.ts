@@ -31,5 +31,21 @@ export class CreateBikeDto {
 
   @IsNotEmpty()
   @IsString()
+  userId: string;
+
+  @IsNotEmpty()
+  @IsString()
   km: string;
+}
+
+export class Bike extends CreateBikeDto {
+  status: boolean;
+  message: string;
+  bikeData: CreateBikeDto;
+}
+
+export interface EmptyBike {
+  status: boolean;
+  message: string;
+  bikeData: unknown;
 }

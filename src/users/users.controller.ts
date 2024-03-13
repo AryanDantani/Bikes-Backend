@@ -45,9 +45,8 @@ export class UsersController {
     @Param('email') email: string,
     @Body('password') password: string,
   ) {
-    console.log(email);
-    await this.usersService.AccountDelete(email, password);
-    return { message: 'Password Deleted successfully' };
+    // console.log(email);
+    return this.usersService.AccountDelete(email, password);
   }
 
   @Post('/send/forgot-password')

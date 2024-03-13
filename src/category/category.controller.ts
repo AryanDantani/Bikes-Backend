@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Header,
   NotFoundException,
@@ -73,5 +74,10 @@ export class CategoryController {
         throw new Error('Failed to Increment stock');
       }
     }
+  }
+
+  @Delete(':id')
+  async DeleteBikebyCategory(@Param('id') id: string) {
+    await this.categoryService.deleteBike(id);
   }
 }

@@ -3,6 +3,7 @@ import { BIKE_MODEL, BikeDocument } from '../bike/bike.schema';
 import { Types } from 'mongoose';
 export interface Bike extends BikeDocument {
   _id: Types.ObjectId;
+  // status: string;
   stock: number; // Assuming 'stock' is stored as a number in the database
   // Define other properties here if necessary
 }

@@ -15,24 +15,31 @@ export class RewardsService {
   ) {}
 
   async createReward(createRewardDto: CreateRewardDto) {
-    console.log(createRewardDto);
     return this.rewardModel.create(createRewardDto);
   }
 
   async findById(id: string) {
-    const rewardData = await this.rewardModel.findById({ _id: id });
-    if (!rewardData) {
-      throw new NotFoundException('RewardCard not found for the user');
+    try {
+      const rewardData = await this.rewardModel.findById({ _id: id });
+      if (!rewardData) {
+        throw new NotFoundException('RewardCard not found for the user');
+      }
+      return {
+        status: true,
+        message: 'Get Reward by Id SuccessFully',
+        rewardData,
+      };
+    } catch (error) {
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
+      };
     }
-    return rewardData;
   }
 
   async findRewardsByUserId(userId: string) {
-    console.log(userId, 'service');
     try {
       const rewardData = await this.rewardModel.find({ user: userId });
-
-      console.log(rewardData);
 
       if (!rewardData || rewardData.length === 0) {
         return {
@@ -40,42 +47,48 @@ export class RewardsService {
         };
       }
 
-      return rewardData;
+      return {
+        status: true,
+        message: 'Reward Genrated Successfully',
+        rewardData,
+      };
     } catch (error) {
-      console.error('Error finding rewards:', error);
-      throw error;
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
+      };
     }
   }
 
   async DeleteReward(id: string, userId: string) {
-    const reward = await this.rewardModel.findById(id);
+    try {
+      const reward = await this.rewardModel.findById(id);
 
-    if (!reward) {
+      if (!reward) {
+        return {
+          message: 'Reward Card is not found',
+        };
+      }
+      const user = await this.usersService.findOne(userId);
+      if (!user) {
+        return {
+          message: 'User data not found',
+        };
+      }
+      const RewardData = reward as unknown as { reward: number };
+      Object(user.user).coins += RewardData.reward;
+      Object(user.user).markModified('user');
+      await Object(user.user).save();
+      await this.rewardModel.findByIdAndDelete(id);
       return {
-        message: 'Reward Card is not found',
+        _id: id,
+        message: 'Reward Card Is Claimed Successfully',
+      };
+    } catch (error) {
+      return {
+        status: false,
+        message: error.message || 'Internal Server Error',
       };
     }
-
-    const user = await this.usersService.findOne(userId);
-
-    const RewardData = reward as unknown as { reward: number };
-
-    if (!user) {
-      // Handle the case where the user is not found
-      return {
-        message: 'User data not found',
-      };
-    }
-
-    user.coins += RewardData.reward;
-    user.markModified('user');
-    await user.save();
-
-    await this.rewardModel.findByIdAndDelete(id);
-
-    return {
-      _id: id,
-      message: 'Reward Card Is Claimed Successfully',
-    };
   }
 }

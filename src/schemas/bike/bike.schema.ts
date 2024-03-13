@@ -1,15 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-// import { Types } from 'mongoose';
-// import { Types } from 'mongoose';
 
 @Schema({
   timestamps: true,
 })
 export class Bikes {
-  // @Prop({ type: Types.ObjectId })
-  // _id: Types.ObjectId;
-  // id: Types.ObjectId;
-
   @Prop()
   date: string;
 
@@ -28,6 +22,9 @@ export class Bikes {
   @Prop()
   rent: string;
 
+  @Prop()
+  userId: string;
+
   @Prop({ default: false })
   isRented: boolean;
 
@@ -36,6 +33,9 @@ export class Bikes {
 
   @Prop()
   km: string;
+
+  @Prop()
+  status: string;
 
   @Prop({ type: Number })
   stock: number;
