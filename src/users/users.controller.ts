@@ -59,7 +59,7 @@ export class UsersController {
     @Param('email') email: string,
     @Body('newPassword') newPassword: string,
   ) {
-    console.log(email);
+    // console.log(email);
     await this.usersService.findUserAndUpdatePasswordByEmail(
       email,
       newPassword,

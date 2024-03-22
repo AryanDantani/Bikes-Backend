@@ -7,6 +7,7 @@ import { BIKE_MODEL, BikeSchema } from './bike/bike.schema';
 import { OTP_MODEL, OtpSchema } from './Otp/oneTimepass.schema';
 import { REWARD_MODEL, RewardSchema } from './rewards/rewards.schema';
 import { ADDRENTAL_MODEL, AddRentalSchema } from './addRental/addRental.schema';
+import { REQUEST_MODEL, RequestSchema } from './request/request.schema';
 
 const MODELS = [
   { name: USER_MODEL, schema: UserSchema },
@@ -16,6 +17,7 @@ const MODELS = [
   { name: OTP_MODEL, schema: OtpSchema },
   { name: REWARD_MODEL, schema: RewardSchema },
   { name: ADDRENTAL_MODEL, schema: AddRentalSchema },
+  { name: REQUEST_MODEL, schema: RequestSchema },
 ];
 
 @Global()

@@ -44,15 +44,22 @@ export class UsersService {
     try {
       const { name, email, password, phone, role } = createUserDto;
 
+      // Check if password meets minimum length requirement
+      if (password.length <= 5) {
+        return {
+          status: false,
+          message: 'Password must be longer than 6 characters',
+        };
+      }
+
       const existingUserWithEmail = await this.userModule.findOne({ email });
       if (existingUserWithEmail) {
         existingUserWithEmail.status = 'Active';
-
         existingUserWithEmail.markModified('user');
         await existingUserWithEmail.save();
         return {
           status: true,
-          message: 'Account Created Successfuly',
+          message: 'Account Created Successfully',
         };
       } else {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -67,7 +74,7 @@ export class UsersService {
 
         return {
           status: true,
-          message: 'User Register SuccessFully',
+          message: 'User Registered Successfully',
           user,
         };
       }
@@ -188,7 +195,7 @@ export class UsersService {
       `,
       };
       const sendEmail = await this.emailService.sendEmail(userData);
-      console.log(sendEmail);
+      // console.log(sendEmail);
 
       if (!sendEmail) {
         return {
@@ -197,7 +204,7 @@ export class UsersService {
         };
       }
 
-      console.log('token', token);
+      // console.log('token', token);
       return {
         status: true,
         message: 'Password reset email sent successfully',
@@ -269,7 +276,7 @@ export class UsersService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      console.log(user, 'user');
+      // console.log(user, 'user');
       return {
         status: true,
         user: user,

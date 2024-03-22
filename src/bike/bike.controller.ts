@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  // Post,
-  // Body,
-  // Patch,
-  Param,
-  Post,
-  // Delete,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { BikeService } from './bike.service';
 import { CreateBikeDto } from './dto/create-bike.dto';
 

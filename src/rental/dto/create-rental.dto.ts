@@ -34,19 +34,31 @@ export class CreateRentalDto {
   @IsString()
   phone: string;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
   @IsString()
-  date: string;
-
-  @IsNotEmpty()
-  @IsString()
+  @IsOptional()
   startTime: string;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
   @IsString()
+  @IsOptional()
   endTime: string;
+
+  // @IsNotEmpty()
+  @IsString()
+  @IsOptional()
+  startDate: string;
+
+  // @IsNotEmpty()
+  @IsString()
+  @IsOptional()
+  endDate: string;
 
   @IsNotEmpty()
   @IsString()
   licenceNumber: string;
+
+  @IsNotEmpty()
+  @IsString()
+  idProof: string;
 }

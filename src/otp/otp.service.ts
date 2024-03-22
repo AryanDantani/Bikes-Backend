@@ -29,11 +29,7 @@ export class OtpService {
         15 * 60 * 1000,
       );
 
-      return {
-        status: true,
-        message: 'Otp Send To Email SuccessFully',
-        otp,
-      };
+      return otp;
     } catch (error) {
       return {
         status: false,

@@ -47,6 +47,9 @@ export class AddRental {
   @Prop()
   engine: string;
 
+  @Prop({ default: false })
+  status: boolean;
+
   @Prop()
   date: string;
 

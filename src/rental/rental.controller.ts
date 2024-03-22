@@ -25,8 +25,8 @@ export class RentalController {
 
   @Post()
   @Header('Cache-Control', 'POST')
-  async create(@Body() createRentalDto: CreateRentalDto) {
-    return this.rentalService.create(createRentalDto);
+  async create(@Body() createRentalDto: CreateRentalDto, res: any) {
+    return this.rentalService.create(createRentalDto, res);
   }
 
   @Post('genUID/:id/:uid')

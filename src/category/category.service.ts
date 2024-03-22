@@ -50,7 +50,6 @@ export class CategoryService {
     }
 
     category.bikes.push(newBikeData);
-    // console.log(category.bikes, 'bikes');
     const result = await category.save();
     return result;
   }
@@ -92,47 +91,37 @@ export class CategoryService {
   async findBikeUpdate(bikeId: string) {
     try {
       const categories = await this.findAll();
+      let bikeFound = false;
+
       for (const category of categories) {
         const bike = category.bikes.find((b) => b._id.toString() === bikeId);
-        if (!bike) {
-          return {
-            status: false,
-            message: 'Bike Data is Not Found',
-          };
-        } else if (bike.status === 'Deactivate') {
-          bike.status = 'Active';
+        if (bike) {
+          bikeFound = true;
+          if (bike.status === 'Deactivate') {
+            bike.status = 'Active';
+          } else if (bike.status === 'Active') {
+            bike.status = 'Deactivate';
+          }
           category.markModified('bikes');
           await category.save();
           return {
             status: true,
             message: 'Bike status updated successfully',
             bike,
-          };
-        } else if (bike.status === 'Active') {
-          bike.status = 'Deactivate';
-          category.markModified('bikes');
-          await category.save();
-          return {
-            status: true,
-            message: 'Bike status updated successfully',
-            bike,
-          };
-        } else {
-          return {
-            status: false,
-            message: 'Bike Data is not Updated',
           };
         }
       }
-      throw new NotFoundException('Bike not found');
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error; // Rethrow NotFoundException if it's already the specific error
-      } else {
-        throw new InternalServerErrorException(
-          'An error occurred while updating bike status',
-        );
+
+      if (!bikeFound) {
+        return {
+          status: false,
+          message: 'Bike not found',
+        };
       }
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An error occurred while updating bike status',
+      );
     }
   }
 
@@ -140,10 +129,12 @@ export class CategoryService {
     try {
       const categories = await this.findAll();
       for (const category of categories) {
-        const index = category.bikes.findIndex((b) => b._id.toString() === Id);
-        console.log(index);
+        const index = category?.bikes.findIndex(
+          (b) => b?._id?.toString() === Id,
+        );
         if (index !== -1) {
           category.bikes.splice(index, 1);
+          category.markModified('category'); // Corrected the field name
           await category.save();
           return { status: true, message: 'Bike deleted successfully' };
         }
@@ -163,10 +154,11 @@ export class CategoryService {
 
       for (const category of categories) {
         const bike = category.bikes.find((b) => b._id.toString() === bikeId);
+        console.log(bike);
         if (bike) {
           const bikeWithStock = bike as { stock: number };
           bikeWithStock.stock += 1;
-          category.markModified('bikes');
+          category.markModified('bike');
           await category.save();
           return;
         }
@@ -195,7 +187,7 @@ export class CategoryService {
           }
           category.markModified('bikes');
           await category.save();
-          console.log(category);
+          // console.log(category);
           return;
         }
       }

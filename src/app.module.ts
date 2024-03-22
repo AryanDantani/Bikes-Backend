@@ -14,6 +14,8 @@ import { RewardsModule } from './rewards/rewards.module';
 import { CronModule } from './cronJob/cronJob.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AddRentalModule } from './add-rental/add-rental.module';
+import { InvoiceModule } from './invoice/invoice.module';
+import { RequestModule } from './request/request.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -32,6 +34,8 @@ import { AddRentalModule } from './add-rental/add-rental.module';
     CronModule,
     CloudinaryModule,
     AddRentalModule,
+    InvoiceModule,
+    RequestModule,
   ],
   controllers: [AppController],
   providers: [AppService],
