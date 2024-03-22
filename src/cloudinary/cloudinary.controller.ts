@@ -21,10 +21,9 @@ export class CloudinaryController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('image'))
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    // console.log(file);
+    console.log(file, 'file');
     const result = await this.cloudinaryService.uploadImage(file);
     return result;
-    // console.log(result);
   }
 
   @Post('upload/:userId')
@@ -33,9 +32,7 @@ export class CloudinaryController {
     @UploadedFile() file: Express.Multer.File,
     @Param('userId') userId: string,
   ) {
-    // console.log(file);
     const result = await this.cloudinaryService.uploadProfile(file, userId);
     return result;
-    // console.log(result);
   }
 }

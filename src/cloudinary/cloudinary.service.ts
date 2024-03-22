@@ -29,7 +29,6 @@ export class CloudinaryService {
               console.error('Error uploading image to Cloudinary:', error);
               reject(new Error('Failed to upload image to Cloudinary'));
             } else {
-              console.log(result, 'result');
               resolve({
                 status: true,
                 data: result.public_id,
@@ -58,7 +57,7 @@ export class CloudinaryService {
               console.error('Error uploading image to Cloudinary:', error);
               reject(new Error('Failed to upload image to Cloudinary'));
             } else {
-              console.log(result, 'result');
+              // console.log(result, 'result');
 
               if (user) {
                 Object(user.user).image = result.url;

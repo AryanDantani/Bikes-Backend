@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateAddRentalDto {
   @IsNotEmpty()
@@ -52,6 +58,10 @@ export class CreateAddRentalDto {
   @IsNotEmpty()
   @IsString()
   date: string;
+
+  @IsBoolean()
+  @IsOptional()
+  status: boolean;
 
   @IsNotEmpty()
   @IsString()

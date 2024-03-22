@@ -14,7 +14,7 @@ export class EmailService {
           pass: process.env.OWNER_PASSWORD,
         },
       });
-      console.log(userData.email);
+      // console.log(userData.email);
       const data = await transporter.sendMail({
         from: process.env.OWNER_EMAIL,
         to: userData.email,

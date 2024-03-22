@@ -38,8 +38,8 @@ export class AddRentalController {
     @Param('Id') Id: string,
     @Body() desiredStatus: IDesiredStatus,
   ) {
-    console.log(typeof desiredStatus);
-    console.log(desiredStatus, 'status');
+    // console.log(typeof desiredStatus);
+    // console.log(desiredStatus, 'status');
     await this.addRentalService.UpdateStatus(Id, bikeId, desiredStatus);
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Res } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { RentalDocument, Rental_MODEL } from 'src/schemas/rental/rental.schema';
 import { Model } from 'mongoose';
@@ -9,6 +9,8 @@ import { UsersService } from 'src/users/users.service';
 import { CategoryService } from 'src/category/category.service';
 import { EmailService } from 'src/email-service/email-service.service';
 import { RewardsService } from 'src/rewards/rewards.service';
+import moment from 'moment';
+import { InvoiceService } from 'src/invoice/invoice.service';
 
 @Injectable()
 export class RentalService {
@@ -20,6 +22,7 @@ export class RentalService {
     private readonly bikeService: BikeService,
     private readonly emailService: EmailService,
     private readonly rewardService: RewardsService,
+    private readonly invoiceService: InvoiceService,
   ) {}
 
   async findAll() {
@@ -93,112 +96,8 @@ export class RentalService {
     }
   }
 
-  //   async create(createRentalDto: CreateRentalDto) {
-  //     const user = await this.usersService.findOne(createRentalDto.userId);
-  //     const bike = await this.bikeService.findOne(createRentalDto.bikeId);
-
-  //     if (!user) {
-  //       throw new NotFoundException('User not found');
-  //     } else if (!bike) {
-  //       throw new NotFoundException('Bike not found');
-  //     }
-
-  //     const existingBooking = await this.rentalModel.findOne({
-  //       user: createRentalDto.userId,
-  //       status: 'Booked',
-  //       // date: { $gte: new Date().setHours(0, 0, 0, 0) }, // Check for bookings on the current day
-  //     });
-
-  //     // console.log(existingBooking);
-
-  //     if (existingBooking) {
-  //       return {
-  //         status: 204,
-  //         message: 'User already has a rental booking for today',
-  //       };
-  //     }
-
-  //     // Check age requirement
-  //     if (createRentalDto.age <= 17) {
-  //       return {
-  //         message: '18 or 18+ age is required',
-  //       };
-  //     }
-
-  //     const rentalId = this.generateUniqueId(15);
-  //     const userData = {
-  //       email: createRentalDto.email,
-  //       subject: 'Password Reset Request',
-  //       html: `
-  //       <body>
-  //     <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
-  //         <tbody>
-  //             <tr>
-  //                 <td style="background: url('https://sukuto.com/images/home_search_background.webp'); padding: 50px 0;">
-  //                     <table width="650" style="background-color: transparent; border: 1px solid #ccc; margin: 0 auto;" cellspacing="0" cellpadding="0" border="0" align="center">
-  //                         <tbody>
-  //                             <tr>
-  //                                 <td style="padding: 30px;">
-  //                                     <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
-  //                                         <tbody>
-  //                                             <tr>
-  //                                                 <td align="center">
-  //                                                     <h1 style="color: #FFF; font-size: 2em; margin: 0;">UID Verification</h1>
-  //                                                     <h1 style="color: #FFF;">your booking is registered</h1>
-  //                                                 </td>
-  //                                             </tr>
-  //                                             <tr>
-  //                                                 <td>&nbsp;</td>
-  //                                             </tr>
-  //                                             <tr>
-  //                                                 <td align="center">
-  //                                                     <p style="font-size: 1.2em; color: #fff; margin: 0;">IT's Your UID</p>
-  //                                                     <p style="font-size: 2em; color: #50bbe7; margin: 0; padding-top: 10px;"> ${rentalId}</p> <!-- Replace with dynamic OTP -->
-  //                                                 </td>
-  //                                             </tr>
-  //                                             <tr>
-  //                                                 <td>&nbsp;</td>
-  //                                             </tr>
-  //                                             <tr>
-  //                                                 <td align="center">
-  //                                                     <p style="font-size: 1.2em; color: red; margin: 0;">Please Do not Share Your UID</p>
-  //                                                 </td>
-  //                                             </tr>
-  //                                         </tbody>
-  //                                     </table>
-  //                                 </td>
-  //                             </tr>
-  //                             <tr>
-  //                                 <td width="100%" valign="middle" align="center" style="background-color: brown; padding: 20px 0;">
-  //                                     <p style="font-size: 14px; color: #fff; margin: 0;">
-  //                                         <a style="color: #fff; text-decoration: none;" href="https://example.com/terms" target="_blank">Terms of Use</a> |
-  //                                         <a style="color: #fff; text-decoration: none;" href="https://example.com/privacy" target="_blank">Privacy Policy</a> |
-  //                                         <a style="color: #fff; text-decoration: none;" href="https://example.com/compliance" target="_blank">Compliance</a>
-  //                                     </p>
-  //                                 </td>
-  //                             </tr>
-  //                         </tbody>
-  //                     </table>
-  //                 </td>
-  //             </tr>
-  //         </tbody>
-  //     </table>
-  // </body>
-  //       `,
-  //     };
-  //     await this.emailService.sendEmail(userData);
-
-  //     return this.rentalModel.create({
-  //       ...createRentalDto,
-  //       user: createRentalDto.userId,
-  //       bike: createRentalDto.bikeId,
-  //       UID: rentalId,
-  //       isCompleted: true,
-  //       status: 'Booked',
-  //     });
-  //   }
-
-  async create(createRentalDto: CreateRentalDto) {
+  async create(createRentalDto: CreateRentalDto, res: any) {
+    // Add 'res: Response' parameter
     try {
       const user = await this.usersService.findOne(createRentalDto.userId);
       const bike = await this.bikeService.findOne(createRentalDto.bikeId);
@@ -212,7 +111,6 @@ export class RentalService {
       const existingBooking = await this.rentalModel.findOne({
         user: createRentalDto.userId,
         status: 'Booked',
-        // date: { $gte: new Date().setHours(0, 0, 0, 0) }, // Check for bookings on the current day
       });
 
       if (existingBooking) {
@@ -233,63 +131,66 @@ export class RentalService {
         email: createRentalDto.email,
         subject: 'Password Reset Request',
         html: `
-        <body>
-      <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
-          <tbody>
-              <tr>
-                  <td style="background: url('https://sukuto.com/images/home_search_background.webp'); padding: 50px 0;">
-                      <table width="650" style="background-color: transparent; border: 1px solid #ccc; margin: 0 auto;" cellspacing="0" cellpadding="0" border="0" align="center">
-                          <tbody>
-                              <tr>
-                                  <td style="padding: 30px;">
-                                      <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
-                                          <tbody>
-                                              <tr>
-                                                  <td align="center">
-                                                      <h1 style="color: #FFF; font-size: 2em; margin: 0;">UID Verification</h1>
-                                                      <h1 style="color: #FFF;">your booking is registered</h1>
-                                                  </td>
-                                              </tr>
-                                              <tr>
-                                                  <td>&nbsp;</td>
-                                              </tr>
-                                              <tr>
-                                                  <td align="center">
-                                                      <p style="font-size: 1.2em; color: #fff; margin: 0;">IT's Your UID</p>
-                                                      <p style="font-size: 2em; color: #50bbe7; margin: 0; padding-top: 10px;"> ${rentalId}</p> <!-- Replace with dynamic OTP -->
-                                                  </td>
-                                              </tr>
-                                              <tr>
-                                                  <td>&nbsp;</td>
-                                              </tr>
-                                              <tr>
-                                                  <td align="center">
-                                                      <p style="font-size: 1.2em; color: red; margin: 0;">Please Do not Share Your UID</p>
-                                                  </td>
-                                              </tr>
-                                          </tbody>
-                                      </table>
-                                  </td>
-                              </tr>
-                              <tr>
-                                  <td width="100%" valign="middle" align="center" style="background-color: brown; padding: 20px 0;">
-                                      <p style="font-size: 14px; color: #fff; margin: 0;">
-                                          <a style="color: #fff; text-decoration: none;" href="https://example.com/terms" target="_blank">Terms of Use</a> |
-                                          <a style="color: #fff; text-decoration: none;" href="https://example.com/privacy" target="_blank">Privacy Policy</a> |
-                                          <a style="color: #fff; text-decoration: none;" href="https://example.com/compliance" target="_blank">Compliance</a>
-                                      </p>
-                                  </td>
-                              </tr>
-                          </tbody>
-                      </table>
-                  </td>
-              </tr>
-          </tbody>
-      </table>
-  </body>
-        `,
+            <body>
+          <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+              <tbody>
+                  <tr>
+                      <td style="background: url('https://sukuto.com/images/home_search_background.webp'); padding: 50px 0;">
+                          <table width="650" style="background-color: transparent; border: 1px solid #ccc; margin: 0 auto;" cellspacing="0" cellpadding="0" border="0" align="center">
+                              <tbody>
+                                  <tr>
+                                      <td style="padding: 30px;">
+                                          <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+                                              <tbody>
+                                                  <tr>
+                                                      <td align="center">
+                                                          <h1 style="color: #FFF; font-size: 2em; margin: 0;">UID Verification</h1>
+                                                          <h1 style="color: #FFF;">your booking is registered</h1>
+                                                      </td>
+                                                  </tr>
+                                                  <tr>
+                                                      <td>&nbsp;</td>
+                                                  </tr>
+                                                  <tr>
+                                                      <td align="center">
+                                                          <p style="font-size: 1.2em; color: #fff; margin: 0;">IT's Your UID</p>
+                                                          <p style="font-size: 2em; color: #50bbe7; margin: 0; padding-top: 10px;"> ${rentalId}</p> <!-- Replace with dynamic OTP -->
+                                                      </td>
+                                                  </tr>
+                                                  <tr>
+                                                      <td>&nbsp;</td>
+                                                  </tr>
+                                                  <tr>
+                                                      <td align="center">
+                                                          <p style="font-size: 1.2em; color: red; margin: 0;">Please Do not Share Your UID</p>
+                                                      </td>
+                                                  </tr>
+                                              </tbody>
+                                          </table>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                      <td width="100%" valign="middle" align="center" style="background-color: brown; padding: 20px 0;">
+                                          <p style="font-size: 14px; color: #fff; margin: 0;">
+                                              <a style="color: #fff; text-decoration: none;" href="https://example.com/terms" target="_blank">Terms of Use</a> |
+                                              <a style="color: #fff; text-decoration: none;" href="https://example.com/privacy" target="_blank">Privacy Policy</a> |
+                                              <a style="color: #fff; text-decoration: none;" href="https://example.com/compliance" target="_blank">Compliance</a>
+                                          </p>
+                                      </td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </td>
+                  </tr>
+              </tbody>
+          </table>
+      </body>
+            `,
       };
       await this.emailService.sendEmail(userData);
+      await this.categoryService.decrementStock(
+        createRentalDto?.bikeId?.toString(),
+      );
 
       const newRental = await this.rentalModel.create({
         ...createRentalDto,
@@ -299,12 +200,6 @@ export class RentalService {
         isCompleted: true,
         status: 'Booked',
       });
-
-      return {
-        status: true,
-        message: 'Rental Data Added SuccessFully',
-        newRental,
-      };
     } catch (error) {
       return {
         status: false,
@@ -474,7 +369,10 @@ export class RentalService {
 
         rental.markModified('rental');
         await rental.save();
-      } else if (Object(user.user).role === 'user') {
+      } else if (
+        Object(user.user).role === 'user' ||
+        Object(user.user).role === 'owner'
+      ) {
         rental.isCompleted = false;
         rental.isDeleted = false;
         rental.isCancel = true;
@@ -483,7 +381,7 @@ export class RentalService {
         await rental.save();
       }
 
-      console.log(rental);
+      // console.log(rental);
       await this.categoryService.incrementStock(bikeId);
 
       return {

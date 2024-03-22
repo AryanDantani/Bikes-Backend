@@ -11,6 +11,7 @@ import { OtpService } from 'src/otp/otp.service';
 import { CategoryService } from 'src/category/category.service';
 import { RewardsService } from 'src/rewards/rewards.service';
 import { RewardsModule } from 'src/rewards/rewards.module';
+import { InvoiceService } from 'src/invoice/invoice.service';
 
 @Module({
   imports: [UsersModule, BikeModule, RewardsModule],
@@ -23,8 +24,9 @@ import { RewardsModule } from 'src/rewards/rewards.module';
     EmailService,
     OtpService,
     CategoryService,
+    InvoiceService,
     RewardsService,
   ],
-  exports: [RentalModule],
+  exports: [],
 })
 export class RentalModule {}

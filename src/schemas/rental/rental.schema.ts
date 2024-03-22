@@ -37,6 +37,9 @@ export class Rental {
   @Prop({ default: false })
   isDeleted: boolean;
 
+  @Prop({ default: false })
+  isDay: boolean;
+
   @Prop()
   status: string;
 
@@ -44,10 +47,13 @@ export class Rental {
   phone: string;
 
   @Prop()
-  date: string;
+  startTime: string;
 
   @Prop()
-  startTime: string;
+  startDate: string;
+
+  @Prop()
+  endDate: string;
 
   @Prop()
   UID: string;
@@ -57,6 +63,9 @@ export class Rental {
 
   @Prop()
   licenceNumber: string;
+
+  @Prop()
+  idProof: string;
 }
 
 export type RentalDocument = Rental & Document;
